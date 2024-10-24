@@ -1,0 +1,34 @@
+# Nuxt 3 Project Git Ignore File
+
+# Node.js and npm/yarn
+node_modules/
+yarn-lock.json
+package-lock.json
+
+# Nuxt 3 specific
+/.nuxt/
+.nuxt-telemetry.json
+
+# Build artifacts
+dist/
+.output/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+*.log
+*.pid
+*.sock
+
+# Editor-specific files
+.DS_Store
+Thumbs.db
+
+# Other
+coverage/
+.gitkeep
