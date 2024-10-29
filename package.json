@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.2",
+    "@supabase/supabase-js": "^2.45.6",
     "nuxt": "^3.13.2",
     "vue": "latest",
     "vue-router": "latest"

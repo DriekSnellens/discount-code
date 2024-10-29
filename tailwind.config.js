@@ -2,6 +2,9 @@
 export default {
   content: [],
   theme: {
+    fontFamily: {
+     'sans': ['Arial', 'Helvetica', 'sans-serif'],
+    },
     extend: {},
   },
   plugins: [],
