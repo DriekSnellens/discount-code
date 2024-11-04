@@ -64,9 +64,9 @@
                     </div>
                     
                     <div class="flex w-full items-center justify-between mt-[13px] xl:mt-0">
-                        <div class="xl:ml-11 self-center">
-                            <input v-model="showExpired" class="accent-black rounded" type="checkbox" id="showExpired" name="yes" value="yes" @change="getDiscounts">
-                            <label class="ml-2.5 self-center" for="usageLimit">Toon <span class="underline">ook</span> inactieve kortingscodes</label>
+                        <div class="xl:ml-11 self-center ">
+                            <input v-model="showExpired" class="accent-black rounded hover:cursor-pointer" type="checkbox" id="showExpired" name="yes" value="yes" @change="getDiscounts">
+                            <label class="ml-2.5 self-center hover:cursor-pointer" for="usageLimit">Toon <span class="underline">ook</span> inactieve kortingscodes</label>
                         </div>
                         <NuxtLink to="/manage/add">
                             <div class="p-[15px] hover:cursor-pointer bg-[#FCCC2C] max-h-14 flex flex-row items-center rounded self-end">
