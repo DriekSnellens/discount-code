@@ -6,22 +6,29 @@
   const showExpired = ref(false);
 
   async function getDiscounts() {
-    if(showExpired.value) {
-        const { data } = await supabase
+    const baseQuery = supabase
         .from('discount')
         .select()
-        .order(sort.value)
-        .or(`code.ilike.%${search.value}%, title.ilike.%${search.value}%`)
-        discounts.value = data;
+        .order(sort.value);
+
+    let query = baseQuery;
+
+    if (search.value) {
+        query = query.or(`code.ilike.%${search.value}%, title.ilike.%${search.value}%`);
+    }
+
+    if (!showExpired.value) {
+        query = query.or(`valid_until.gte.${new Date().toDateString()},valid_until.is.null`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error fetching discounts:', error);
     } else {
-        const { data } = await supabase
-        .from('discount')
-        .select()
-        .order(sort.value)
-        .or(`valid_until.gte.${new Date().toDateString()}, valid_until.is.null`);
         discounts.value = data;
     }
-  }
+}
 
   const handleDeleteCoupon = async (id:number) => {
     const { error } = await supabase
@@ -30,15 +37,6 @@
     .eq('id', id);
 
     getDiscounts();
-  }
-
-  const searchCoupons = async () => {
-    let { data } = await supabase
-        .from('discount')
-        .select("*")
-        .or(`code.ilike.%${search.value}%, title.ilike.%${search.value}%`)
-
-    discounts.value = data;
   }
 
   onMounted(() => {
@@ -59,7 +57,7 @@
                             <option value="valid_from">Sorteer op geldigheid</option>
                     </select>
                     <input v-model="search" placeholder="Zoek op trefwoord" class="border border-[#7070708B] max-h-14 p-[17px] ml-[13px] rounded-l min-w-[291px]" />
-                    <div @click="searchCoupons()" class="px-5 py-4 bg-[#FCCC2C] hover:cursor-pointer max-h-14 -ml-px min-w-[116px] text-sm content-center font-bold border border-l-0 border-[#7070708B] rounded-r">
+                    <div @click="getDiscounts" class="px-5 py-4 bg-[#FCCC2C] hover:cursor-pointer max-h-14 -ml-px min-w-[116px] text-sm content-center font-bold border border-l-0 border-[#7070708B] rounded-r">
                         <i class="fa-solid fa-search"></i><span class="ml-[7px]">Zoeken</span>
                     </div>
                     <div class="flex w-full items-center justify-between">
