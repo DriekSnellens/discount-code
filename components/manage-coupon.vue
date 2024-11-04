@@ -1,22 +1,39 @@
-<script setup>
-  import { supabase } from '../utils/supabase'
-  import { DiscountType } from '../types/discount-type'
-  const discounts = ref([]);
+<script setup lang="ts">
+  import { DiscountType } from '@/types/index';
+  import { supabase } from '../utils/supabase';
+  import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 
-  const formData = reactive( {
-    title : '',
-    code : '',
-    description : '',
-    discount_type_id : DiscountType.PRICE,
-    discount_value : 5,
-    valid_from : '',
-    valid_until : 'null',
-    usage_limit : false,
-    usage_count : 1
-  });   
+  const discounts = ref();
+
+  const props = defineProps<{ couponId?: string | string[]}>();
+
+  const intializeForm = async () => {
+    if(props.couponId) {
+     const { data } = await supabase
+     .from('discount')
+     .select()
+     .eq('id', parseInt(props.couponId as string)) as PostgrestSingleResponse<any>;
+     console.log(data[0]);
+     return ref( { ...data[0] } )
+    } else {
+        return ref({
+            title : '',
+            code : '',
+            description : '',
+            discount_type_id : DiscountType.PRICE,
+            discount_value : 5,
+            valid_from : '',
+            valid_until : null,
+            usage_limit : false,
+            usage_count : 1
+        })
+    }
+  }
+
+  const formData = await intializeForm();  
 
   const discountText = computed(() => {
-    return formData.discount_type_id === DiscountType.PRICE ? 'Bedrag' : 'Percentage'
+    return formData.value.discount_type_id === DiscountType.PRICE ? 'Bedrag' : 'Percentage'
   })
 
   async function getDiscounts() {
@@ -25,15 +42,23 @@
   }
 
   const saveDiscount = async () => {
-    formData.discount_type_id = formData.discount_type_id === DiscountType.PRICE ? 1 : 2;
-    const { data, error } = await supabase
-    .from('discount')   
-    .insert([
-        formData,
-    ])
-    .select();
-    console.log(data,error);
-  } 
+    if(props.couponId) {
+        const { data, error } = await supabase
+        .from('discount')
+        .update(formData.value)
+        .eq('id', props.couponId)
+        .select()
+    } else {
+        const { data, error } = await supabase
+        .from('discount')   
+        .insert([
+            formData.value,
+        ])
+        .select();
+    }
+
+    navigateTo('/');
+  }
 
   onMounted(() => {
     getDiscounts();
@@ -76,19 +101,18 @@
                     <div class="flex flex-row pb-[22px] border-b border-[#707070] justify-between items-center">
                         <span class="w-1/3 text-sm leading-4 font-bold">Type korting</span>
                         <select v-model="formData.discount_type_id" class="border rounded w-[291px] ml-9 h-9" name="discount-type" id="discountType">
-                            <option value="price">Bedrag</option>
-                            <option value="percentage">Percentage</option>
+                            <option value="1">Bedrag</option>
+                            <option value="2">Percentage</option>
                         </select>
                     </div>
                     <div class="flex flex-row pb-[22px] mt-6 items-center">
                         <span class="w-1/3 text-sm leading-4 font-bold">{{ discountText }}</span>
                         <div class="ml-9 flex flex-row">
                             <input v-model="formData.discount_value" class="border text-center rounded w-[58px] h-9" />
-                            <div v-if="formData.discount_type === DiscountType.PRICE">
+                            <div v-if="formData.discount_type_id === DiscountType.PRICE">
                                 ,
                                 <input value="00" class="border text-center rounded w-[38px] h-9" />
                             </div>
-                            
                         </div>
                     </div>
                 </div>
@@ -121,10 +145,12 @@
             </div>
         </div>
         <div class="flex mx-10 border-t py-4 flex-row">
-            <div @click="alert('navigate TO HOME')" class="rounded py-4 px-8 font-bold bg-[#DCDCDC]">
-                Annuleren
-            </div>
-            <div @click="saveDiscount()" class="rounded ml-[15px] py-4 px-8 font-bold bg-[#FCCC2C]">
+            <NuxtLink to="/">
+                <div class="rounded py-4 px-8 hover:cursor-pointer font-bold bg-[#DCDCDC]">
+                    Annuleren
+                </div>
+            </NuxtLink>
+            <div @click="saveDiscount()" class="rounded ml-[15px] hover:cursor-pointer py-4 px-8 font-bold bg-[#FCCC2C]">
                 Opslaan
             </div>
         </div>
